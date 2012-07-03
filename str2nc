@@ -1,0 +1,233 @@
+#!/usr/bin/env python
+'''
+This script converts the str.out file to out.nc
+
+the script will try to import dacapowrap.ini to
+setup a calculator, 
+
+The output will always be in out.nc, but if this file already exists,
+it will be used as the input for this calculation, and renamed to
+out.nc.x where x is an integer starting at 0. the new output will be
+in out.nc.
+
+[VERSION]
+VERSION = Ru
+
+[CALCULATOR]
+KPTS = 512
+PLANEWAVECUTOFF = 300
+DENSITYCUTOFF = 300
+USESYMM = True
+XC = PBE
+
+[VOLUMES]
+Pd = 15.24
+Ag = 17.81
+
+[PSEUDOPOTENTIALS]
+Ag = 047-Ag-gpe-n-floc.uspp
+Pd = 046-Pd-gpe-n-6projectors-floc.uspp
+
+[OPTIMIZATION]
+FMAX = 0.05
+SMAX = 0.006
+
+
+
+John Kitchin
+03/31/05
+
+'''
+import os,sys
+from numpy import *
+from Scientific.Geometry import Vector
+from string import split
+from ase import Atom,Atoms
+from ase.visualize import view
+
+from ase.calculators.jacapo import *
+from ase.calculators.jacapo.pw91_psp import defaultpseudopotentials
+
+from ConfigParser import *
+from optparse import OptionParser
+
+parser = OptionParser(usage='str2nc [str.out] [out.nc]',
+                      version='0.1')
+
+options,args = parser.parse_args()
+
+if len(args) == 0:
+    strout = 'str.out'
+    ncfile = 'out.nc'
+elif len(args) == 1:
+    strout = args[0]
+    ncfile = 'out.nc'
+elif len(args) == 2:
+    strout = args[0]
+    ncfile = args[1]
+    
+####### begin program
+from atat import str2atoms
+atoms = str2atoms(strout)
+
+
+# find dacapowrap.ini
+searchpath = ['../..','..','.']
+for path in searchpath:
+    dacapowrapfile = os.path.join(path,'dacapowrap.ini')
+    if os.path.exists(dacapowrapfile):
+        configparser = ConfigParser()
+        configparser.read(dacapowrapfile)  
+        
+        if configparser.has_option('CALCULATOR','PLANEWAVECUTOFF'):
+            PLANEWAVECUTOFF = configparser.getint('CALCULATOR','PLANEWAVECUTOFF')
+        else:
+            PLANEWAVECUTOFF=350
+            
+
+        if configparser.has_option('CALCULATOR','DENSITYCUTOFF'):
+            DENSITYCUTOFF = configparser.getint('CALCULATOR','DENSITYCUTOFF')
+        else:
+            DENSITYCUTOFF=PLANEWAVECUTOFF
+            
+
+        if configparser.has_option('CALCULATOR','USESYMM'):
+            USESYMM = configparser.getboolean('CALCULATOR','USESYMM')
+        else:
+            USESYM=True
+            
+        if configparser.has_option('CALCULATOR','XC'):
+            XC = configparser.get('CALCULATOR','XC')
+        else:
+            XC = 'PW91'
+
+        if configparser.has_option('CALCULATOR','KPTS'):
+            KPTS = eval(configparser.get('CALCULATOR','KPTS'))
+
+            if (isinstance(KPTS,tuple) or isinstance(KPTS,list)):
+                if len(KPTS) == 3:
+                    print 'Explicit kmesh found: ',KPTS
+                    # this is an explicit kpt mesh that is defined, i.e. (2,2,2)
+            if isinstance(KPTS,int):
+                #print 'Using minumum %i kpts/recatom' % KPTS
+
+                if configparser.has_option('CALCULATOR','KPTSEVEN'):
+                    EVEN = configparser.getboolean('CALCULATOR','KPTSEVEN')
+                else:
+                    EVEN = False
+                    
+                # this is a kpts/reciprocal atom that is defined i.e. (1000)
+
+                #get the number of kpts needed for this cell
+                numkpts = KPTS/len(atoms) #this is the same as multiplying by
+                #the number of reciprocal atoms
+
+                UC = sum(atoms.get_cell()**2,1)**0.5 #lengths of UC vectors
+
+                # start below the value of the constant to allow for
+                # rounding. otherwise, the next largest grid may be found
+                # unnecessarily. 0.9 seems like a good factor.
+                constant =  0.9*(numkpts*multiply.reduce(UC))**(1./3.)
+                while True:
+
+                    grid = array(around(constant/UC),int)
+
+                    if multiply.reduce(grid) >= numkpts:
+                        KPTS = grid
+                        break
+                    else:
+                        constant *= 1.01 #gradually increase the constant until
+                        #the numkpts/atm is satisfied
+
+                
+
+        if configparser.has_section('PSEUDOPOTENTIALS'):
+            PSEUDOPOTENTIALS = {}
+            for element,pspfile in configparser.items('PSEUDOPOTENTIALS'):
+                # the config parser makes these lowercase by default, so
+                # I make sure the first letter is capitalized as necessary
+                element = element[0].upper()+element[1:]
+                defaultpseudopotentials[element] = pspfile
+                PSEUDOPOTENTIALS[element] = pspfile
+
+        if configparser.has_section('VOLUMES'):
+            VOLUMES={}
+            for element,vol in configparser.items('VOLUMES'):
+                element = element[0].upper()+element[1:]
+                VOLUMES[element] = float(vol)
+            # now use atomic volumes as good guess for initial volume
+
+            symbols = atoms.get_chemical_symbols()
+
+            formula = {}
+            for sym in symbols:
+                if sym in formula:
+                    formula[sym] += 1
+                else:
+                    formula[sym] = 1
+            
+            volume = 0.0
+            for element in formula.keys():
+                volume += float(formula[element])*VOLUMES[element]
+
+            currentcell = atoms.get_cell()
+            currentvol = atoms.get_volume()
+
+            f = (volume/currentvol)**(1./3.)
+            newcell = f*currentcell
+
+            atoms.set_cell(newcell,scale_atoms=True)
+
+    
+
+            
+calc = Jacapo(ncfile,
+              pw=PLANEWAVECUTOFF,
+              dw=DENSITYCUTOFF,
+              xc=XC,
+              ft=0.1,
+              kpts=KPTS,
+              symmetry=USESYMM,
+              calculate_stress=True,
+              atoms=atoms)
+
+calc.set(nbands=int(calc.get_valence()/2+15))
+calc.write()
+
+# now create pure elements in the same unitcell configuration and calculator settings
+for symbol in formula.keys():
+    
+    catoms = atoms.copy()
+    volume = 0.0
+    for atom in catoms:
+        atom.set_symbol(symbol)
+        # now use atomic volumes as good guess for initial volume
+        # these should be provided in dacapowrap.ini
+        volume += VOLUMES[symbol]
+
+    currentcell = atoms.get_cell()
+    currentvol = atoms.get_volume()
+
+    f = (volume/currentvol)**(1./3.)
+    newcell = f*currentcell
+
+    atoms.set_cell(newcell,scale_atoms=True)
+
+    ncfile = '%s.nc' % symbol
+    calc = Jacapo(ncfile,
+              pw=PLANEWAVECUTOFF,
+              dw=DENSITYCUTOFF,
+              xc=XC,
+              ft=0.1,
+              kpts=KPTS,
+              symmetry=USESYMM,
+              calculate_stress=True,
+              atoms=catoms)
+    calc.set(nbands=int(calc.get_valence()/2+15))
+    calc.write()
+      
+
+'''
+pollmach.py "str2nc; UC_relaxnc out.nc; UC_relaxnc Pd.nc; UC_relaxnc Ag.nc; Hf.py"
+
+'''
