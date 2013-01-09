@@ -1,0 +1,95 @@
+#+TITLE:     example of using ATAT and the atat python module
+#+AUTHOR:    John Kitchin
+#+EMAIL:     johnrkitchin@gmail.com
+#+DATE:      2013-01-09 Wed
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+
+* Setup the directory
+You can find the atat python code at: https://github.com/jkitchin/python-atat
+
+Here I show an example of setting up and running a cluster expansion.
+
+** Creating lat.in
+The first thing we do is create the lat.in file. We first do this for Cu-Pd on an fcc lattice.
+
+#+BEGIN_SRC sh
+makelat Cu,Pd fcc
+ls
+#+END_SRC
+
+
+
+#+RESULTS:
+: CuPd_fcc
+: #example.org#
+: maps_is_running
+: vasp.wrap
+
+The CuPd_fcc directory was created in that command.
+
+** vasp.wrap
+Put these contents into a file called vasp.wrap. These parameters are used to setup each VASP calculation.
+
+#+begin_example
+[INCAR]
+PREC = high
+ENCUT = 350
+ISMEAR = -1
+SIGMA = 0.1
+NSW = 41
+IBRION = 2
+ISIF = 3
+KPPRA = 2000
+USEPOT = PAWPBE
+DOSTATIC
+#+end_example
+
+This is enough to start ATAT!
+
+* Running ATAT
+Now, cd into the directory created and run this command to start 5 calculations. ATAT will automatically create 5 configurations, and submit 5 jobs to the queue. You need to wait for those to finish before taking the next step.
+
+#+BEGIN_SRC sh
+cd CuPd_fcc
+startatat.py -n 5 -r run_atat_vasp.py
+#+END_SRC
+
+file:../run_atat_vasp.py submits a job that runs the command runstruct_vasp in the directory. It does some work for you that ATAT did not do, for example it computes the number of bands needed, and it should also set the magnetic moments if magnetic elements are found (Fe, Ni right now).
+
+** Checking status of the ATAT directory
+It is convenient to see how the set of calculations is going. 
+To see how you are doing, run this:
+
+#+BEGIN_SRC sh :results output raw 
+cd CuPd_fcc
+atatstatus.py
+#+END_SRC
+
+#+RESULTS:
+# newer energy or error files found. rerun maps -d.
+#+tblname: atatstatus.py
+|configuration| status | command|
+|-
+|  0|                        energy = -3.7221|[[ashell:xterm -e "cd 0; ls && /bin/bash"][xterm]]|
+|  1|                        energy = -5.1797|[[ashell:xterm -e "cd 1; ls && /bin/bash"][xterm]]|
+|  2|                                 Unknown|[[ashell:xterm -e "cd 2; ls && /bin/bash"][xterm]]|
+|  3|      804034.gilgamesh.cheme.cmu.edu (Q)|[[ashell:xterm -e "cd 3; ls && /bin/bash"][xterm]]|
+|  4|      804035.gilgamesh.cheme.cmu.edu (Q)|[[ashell:xterm -e "cd 4; ls && /bin/bash"][xterm]]|
+
+
+If you run that command in org-mode, it will give you a nice table with clickable links.
+
+This will generate a nice summary of the results.
+#+BEGIN_SRC sh
+mapsrep.py
+#+END_SRC
