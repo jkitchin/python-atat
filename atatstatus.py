@@ -30,6 +30,10 @@ for ef in glob.glob('*/error'):
     if this_mtime > mtime:
         mtime = this_mtime
 
+if not os.path.exists('maps.log'):
+    print('It seems there is no maps.log yet.')
+    import sys; sys.exit()
+
 maps_mtime = os.path.getmtime('maps.log')
 if maps_mtime > mtime:
     print '# maps.log is newer than all error/energy files. We are up to date.'

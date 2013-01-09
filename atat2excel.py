@@ -34,6 +34,7 @@ if os.path.exists(XLS):
     sh1 = wbk.get_sheet(1)
     sh2 = wbk.get_sheet(2)
     sh3 = wbk.get_sheet(3)
+    sh4 = wbk.get_sheet(4)
 else:
     wbk = xlwt.Workbook()
     sh0 = wbk.add_sheet('summary')
@@ -66,7 +67,12 @@ else:
     for p in params:
         labels += sorted(getattr(v,p).keys())
     for i,label in enumerate(labels):
-        sh3.write(0,i, label)
+        sh3.write(0, i, label)
+
+    sh4 = wbk.add_sheet('potcars')
+    for i,label in enumerate(['id', 'chemical-symbol', 'potcar', 'git-hash']):
+        sh4.write(0, i, label)
+        
     print('created new file.')
 
 with open('fit.out') as fh:
@@ -139,6 +145,16 @@ with open('fit.out') as fh:
                     sh3.write(NROWS3, i, d)
                 else:
                     sh3.write(NROWS3, i, repr(d))
+
+            # write out the potcar files
+            ppp_list = calc.get_pseudopotentials()
+            for sym,ppp,hash in ppp_list:
+                NROWS4 = len(sh4.get_rows())
+                data = [id1, sym, ppp, hash]
+                for i,d in enumerate(data):
+                    sh4.write(NROWS4, i, d)
+                
+                
                 
         wbk.save('atat.xls')
 

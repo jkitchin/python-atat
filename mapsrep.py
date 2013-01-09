@@ -166,6 +166,9 @@ def newer_files_exist():
         if n != count:
             # number of energies has changed. maybe a directory was deleted
             return True
+    else:
+        print 'No fit.out'
+        import sys; sys.exit()
     return False
 
 if newer_files_exist():
@@ -207,9 +210,10 @@ os.system('cat maps.log')
 #each line contains this information
 #'concentration energy fittedenergy error weight index'
 
-f = open('fit.out','r')
-data = f.readlines()
-f.close()
+if os.path.exists('fit.out'):
+  f = open('fit.out','r')
+  data = f.readlines()
+  f.close()
 
 concentration=[]
 energy=[]
