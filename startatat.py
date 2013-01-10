@@ -24,7 +24,8 @@ if os.path.exists('maps_is_running'):
     print('Detected maps_is_running. attempting to stop it.')
     open('stop','w').close()
     time.sleep(10)
-    os.unlink('maps_is_running')
+    if os.path.exists('maps_is_running'):
+        os.unlink('maps_is_running')
     
 if options.m is None:
     os.system('maps -d&')
