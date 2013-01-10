@@ -42,17 +42,16 @@ atatstatus.py
 # newer energy or error files found. rerun maps -d.
 #+ATTR_LaTex: longtable
 #+tblname: atatstatus.py
-| configuration | status                             | command |
-|---------------+------------------------------------+---------|
-|             0 | energy = -5.5772                   | [[ashell:xterm -e "cd 0; ls && /bin/bash"][xterm]]   |
-|             1 | energy = -3.7401                   | [[ashell:xterm -e "cd 1; ls && /bin/bash"][xterm]]   |
-|            10 | 804321.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 10; ls && /bin/bash"][xterm]]   |
-|             2 | 804313.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 2; ls && /bin/bash"][xterm]]   |
-|             3 | 804314.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 3; ls && /bin/bash"][xterm]]   |
-|             4 | 804315.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 4; ls && /bin/bash"][xterm]]   |
-|             5 | 804316.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 5; ls && /bin/bash"][xterm]]   |
-|             6 | 804317.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 6; ls && /bin/bash"][xterm]]   |
-|             7 | 804318.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 7; ls && /bin/bash"][xterm]]   |
-|             8 | 804319.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 8; ls && /bin/bash"][xterm]]   |
-|             9 | 804320.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 9; ls && /bin/bash"][xterm]]   |
-
+|configuration| status | command|
+|-
+|   0|                        energy = -5.5772|[[ashell:xterm -e "cd 0; ls && /bin/bash"][xterm]]|
+|   1|                        energy = -3.7401|[[ashell:xterm -e "cd 1; ls && /bin/bash"][xterm]]|
+|  10|      804321.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 10; ls && /bin/bash"][xterm]]|
+|   2|      804313.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 2; ls && /bin/bash"][xterm]]|
+|   3|                       energy = -10.6595|[[ashell:xterm -e "cd 3; ls && /bin/bash"][xterm]]|
+|   4|      804315.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 4; ls && /bin/bash"][xterm]]|
+|   5|      804316.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 5; ls && /bin/bash"][xterm]]|
+|   6|      804317.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 6; ls && /bin/bash"][xterm]]|
+|   7|      804318.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 7; ls && /bin/bash"][xterm]]|
+|   8|      804319.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 8; ls && /bin/bash"][xterm]]|
+|   9|      804320.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 9; ls && /bin/bash"][xterm]]|
