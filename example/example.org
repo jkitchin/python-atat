@@ -15,7 +15,7 @@
 #+XSLT:
 
 * Setup the directory
-You can find the atat python code at: https://github.com/jkitchin/python-atat
+You can find the atat python code at: https://github.com/jkitchin/python-atat. 
 
 Here I show an example of setting up and running a cluster expansion.
 
@@ -57,12 +57,28 @@ DOSTATIC
 This is enough to start ATAT!
 
 * Running ATAT
-Now, cd into the directory created and run this command to start 5 calculations. ATAT will automatically create 5 configurations, and submit 5 jobs to the queue. You need to wait for those to finish before taking the next step.
+Now, cd into the directory created and run this command to start 5 calculations. ATAT will automatically create 10 configurations, and submit the jobs to the queue. You need to wait for those to finish before taking the next step.
 
 #+BEGIN_SRC sh
 cd CuPd_fcc
 startatat.py -n 5 -r run_atat_vasp.py
 #+END_SRC
+
+#+RESULTS:
+#+begin_example
+|[[shell:qstat -f 804104.gilgamesh.cheme.cmu.edu][804104.gilgamesh.cheme.cmu.edu]]|
+|[[shell:qstat -f 804105.gilgamesh.cheme.cmu.edu][804105.gilgamesh.cheme.cmu.edu]]|
+|[[shell:qstat -f 804106.gilgamesh.cheme.cmu.edu][804106.gilgamesh.cheme.cmu.edu]]|
+|[[shell:qstat -f 804107.gilgamesh.cheme.cmu.edu][804107.gilgamesh.cheme.cmu.edu]]|
+|[[shell:qstat -f 804108.gilgamesh.cheme.cmu.edu][804108.gilgamesh.cheme.cmu.edu]]|
+|[[shell:qstat -f 804109.gilgamesh.cheme.cmu.edu][804109.gilgamesh.cheme.cmu.edu]]|
+touching ready: 0
+touching ready: 1
+touching ready: 2
+touching ready: 3
+touching ready: 4
+touching ready: 5
+#+end_example
 
 file:../run_atat_vasp.py submits a job that runs the command runstruct_vasp in the directory. It does some work for you that ATAT did not do, for example it computes the number of bands needed, and it should also set the magnetic moments if magnetic elements are found (Fe, Ni right now).
 
@@ -77,19 +93,40 @@ atatstatus.py
 
 #+RESULTS:
 # newer energy or error files found. rerun maps -d.
+#+ATTR_LaTex: longtable
 #+tblname: atatstatus.py
-|configuration| status | command|
-|-
-|  0|                        energy = -3.7221|[[ashell:xterm -e "cd 0; ls && /bin/bash"][xterm]]|
-|  1|                        energy = -5.1797|[[ashell:xterm -e "cd 1; ls && /bin/bash"][xterm]]|
-|  2|                                 Unknown|[[ashell:xterm -e "cd 2; ls && /bin/bash"][xterm]]|
-|  3|      804034.gilgamesh.cheme.cmu.edu (Q)|[[ashell:xterm -e "cd 3; ls && /bin/bash"][xterm]]|
-|  4|      804035.gilgamesh.cheme.cmu.edu (Q)|[[ashell:xterm -e "cd 4; ls && /bin/bash"][xterm]]|
+| configuration | status            | command |
+|---------------+-------------------+---------|
+|             0 | energy = -3.7221  | [[ashell:xterm -e "cd 0; ls && /bin/bash"][xterm]]   |
+|             1 | energy = -5.1797  | [[ashell:xterm -e "cd 1; ls && /bin/bash"][xterm]]   |
+|            18 | energy = -16.7266 | [[ashell:xterm -e "cd 18; ls && /bin/bash"][xterm]]   |
+|             2 | energy = -9.0853  | [[ashell:xterm -e "cd 2; ls && /bin/bash"][xterm]]   |
+|            20 | energy = -19.5118 | [[ashell:xterm -e "cd 20; ls && /bin/bash"][xterm]]   |
+|            28 | energy = -19.5499 | [[ashell:xterm -e "cd 28; ls && /bin/bash"][xterm]]   |
+|             3 | energy = -9.1351  | [[ashell:xterm -e "cd 3; ls && /bin/bash"][xterm]]   |
+|             4 | energy = -12.7938 | [[ashell:xterm -e "cd 4; ls && /bin/bash"][xterm]]   |
+|             5 | energy = -14.2859 | [[ashell:xterm -e "cd 5; ls && /bin/bash"][xterm]]   |
+|             6 | energy = -12.9228 | [[ashell:xterm -e "cd 6; ls && /bin/bash"][xterm]]   |
+|             7 | energy = -14.2949 | [[ashell:xterm -e "cd 7; ls && /bin/bash"][xterm]]   |
 
 
 If you run that command in org-mode, it will give you a nice table with clickable links.
 
-This will generate a nice summary of the results.
-#+BEGIN_SRC sh
+This next command will generate a nice summary of the results and put some figures into your org-file. The command is a python wrapper around the mapsrep command so that we get matplotlib figures. While the figures are open you can interact with them somewhat by clicking on the data points.
+#+BEGIN_SRC sh :results output raw
+cd CuPd_fcc
 mapsrep.py
 #+END_SRC
+
+#+RESULTS:
+Maps version 2.86
+The internal database of structures extends up to 0 atoms/unit cell, see predstr.out
+Among structures of known energy, true and predicted ground states agree
+No other ground states of 0 atoms/unit cell or less exist.
+Concentration range used for ground state checking: [0,1].
+Crossvalidation score: 0.0111802
+[[./groundstate-hull.png]]
+[[./residual-error.png]]
+[[./eci-cluster-radius.png]]
+
+It appears that the cluster expansion has converged, with only a few configurations. I would be skeptical of this, and run at least 20 configurations to be sure.
