@@ -22,12 +22,37 @@ We will use a script that does these things:
 1. setup the atoms, scale the volume according to Vegard's law, and set the magnetic moments on each atom (2.5 for Ni, 0.0 for Al).
 2. Setup a calculator with default settings for this project, and compute the kpt grid that meets a kpt/rec-atom density.
 3. Compute an equation of state to get the ground state volume, energy, bulk modulus, and magnetic moment. Store that data in a json file for future analysis.
+4. After we are done, create the energy file, and delete the wait and jobid files. In the event of an error, this script should also create an error file. 
 
-file:custom_nial_run.py
+The script that does that is here: file:custom_nial_run.py
 
-
-Here is how we run the script.
+* Running the script
+Here is how we run the script. Note the script is not on your executable path, so we have to provide a /relative/ path to the script from inside an ATAT directory.
 
 #+BEGIN_SRC sh
-startatat.py -n 5 -r ../custom_nial_run.py
+startatat.py -n 10 -r ../custom_nial_run.py
 #+END_SRC
+
+
+#+BEGIN_SRC sh :results output raw
+atatstatus.py
+#+END_SRC
+
+#+RESULTS:
+# newer energy or error files found. rerun maps -d.
+#+ATTR_LaTex: longtable
+#+tblname: atatstatus.py
+| configuration | status                             | command |
+|---------------+------------------------------------+---------|
+|             0 | energy = -5.5772                   | [[ashell:xterm -e "cd 0; ls && /bin/bash"][xterm]]   |
+|             1 | energy = -3.7401                   | [[ashell:xterm -e "cd 1; ls && /bin/bash"][xterm]]   |
+|            10 | 804321.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 10; ls && /bin/bash"][xterm]]   |
+|             2 | 804313.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 2; ls && /bin/bash"][xterm]]   |
+|             3 | 804314.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 3; ls && /bin/bash"][xterm]]   |
+|             4 | 804315.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 4; ls && /bin/bash"][xterm]]   |
+|             5 | 804316.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 5; ls && /bin/bash"][xterm]]   |
+|             6 | 804317.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 6; ls && /bin/bash"][xterm]]   |
+|             7 | 804318.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 7; ls && /bin/bash"][xterm]]   |
+|             8 | 804319.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 8; ls && /bin/bash"][xterm]]   |
+|             9 | 804320.gilgamesh.cheme.cmu.edu (R) | [[ashell:xterm -e "cd 9; ls && /bin/bash"][xterm]]   |
+
