@@ -14,7 +14,11 @@ CWD = os.getcwd()
 for dirpath, dirnames, filenames in os.walk('.'):
 
     if target in filenames:
-        os.chdir(dirpath)
-        status,output = commands.getstatusoutput(command)
-        print output
-        os.chdir(CWD)
+        try:
+            os.chdir(dirpath)
+            status,output = commands.getstatusoutput(command)
+            print status, output
+        except:
+            print('Caught exception in {0}'.format(CWD))
+        finally:
+            os.chdir(CWD)
