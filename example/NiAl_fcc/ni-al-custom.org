@@ -1,0 +1,33 @@
+#+TITLE:     ni-al-custom.org
+#+AUTHOR:    John Kitchin
+#+EMAIL:     johnrkitchin@gmail.com
+#+DATE:      2013-01-10 Thu
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+
+* ATAT with custom run script
+The default run scripts in ATAT do not always do exactly what you want. In this example, we consider how to run a series of calculations on each configuration to get magnetic properties and the bulk modulus, in addition to the energy.
+
+We will use a script that does these things:
+
+1. setup the atoms, scale the volume according to Vegard's law, and set the magnetic moments on each atom (2.5 for Ni, 0.0 for Al).
+2. Setup a calculator with default settings for this project, and compute the kpt grid that meets a kpt/rec-atom density.
+3. Compute an equation of state to get the ground state volume, energy, bulk modulus, and magnetic moment. Store that data in a json file for future analysis.
+
+file:custom_nial_run.py
+
+
+Here is how we run the script.
+
+#+BEGIN_SRC sh
+startatat.py -n 5 -r ../custom_nial_run.py
+#+END_SRC
