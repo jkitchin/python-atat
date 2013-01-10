@@ -39,10 +39,9 @@ KPPRA = 2000
 
 # string template to print eventually
 s = '{cwd}: E={energy:1.3f} eV  V={volume:1.3f} A^3 B={B:1.0f} GPa M={M:1.2f} mu'
+base,cwd = os.path.split(os.getcwd())
 
 def run():
-    base,cwd = os.path.split(os.getcwd())
-    
     # look for atat.json It contains all the data we want. If it
     # exists, just return so no new calculations get created.
     if os.path.exists('atat.json'):
@@ -72,31 +71,30 @@ def run():
         calc.set_nbands(f=2)
 
         data = calc.get_eos()
-        volume = atoms.get_volume()
-        energy = atoms.get_potential_energy()
         M = atoms.get_magnetic_moment()
         B = data['step2']['avgB']
             
         with open('energy', 'w') as f:
-            f.write(repr(energy))
+            f.write(repr(data['step3']['potential_energy']))
                 
     # now we are done, we can delete some files
     for f in ['wait', 'jobid']:
         if os.path.exists(f):
             os.unlink(f)
 
+    # create json data to store
     jsondata = {'cwd':cwd,
-                'energy':energy,
-                'volume': volume/len(atoms),
+                'energy': data['step3']['potential_energy'],
+                'volume': data['step3']['volume']/len(atoms),
                 'B':B,
                 'M':M}
     
-    # save json data for further analysis
+    # save json data
     with open('atat.json','w') as f:
         f.write(json.dumps(jsondata))
 
     # print summary line
-    print(s.format(**jsondata()))
+    print(s.format(**jsondata))
         
 if __name__ == '__main__':
     # if we are in the queue, run the function above
@@ -106,9 +104,19 @@ if __name__ == '__main__':
     else:
         # we are not in the queue, so we should submit a job if needed
         if os.path.exists('atat.json'):
+            with open('atat.json') as f:
+                data = json.loads(f.read())
+                data['cwd'] = cwd
+                print(s.format(**data))
+                sys.exit()
+        # see if a job exists. Exit if it does.
+        elif os.path.exists('jobid'):
+            with open('jobid') as f:
+                jobid = f.readline()
+            print('jobid {0} exists.'.format(jobid))
             sys.exit()
 
-        # no energy file, so submit a job
+        # now, submit a job
         script = '''
 #!/bin/bash
 cd $PBS_O_WORKDIR
