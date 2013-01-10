@@ -28,9 +28,9 @@ if os.path.exists('maps_is_running'):
         os.unlink('maps_is_running')
     
 if options.m is None:
-    os.system('maps -d&')
+    os.system('maps -d &')
 else:
-    os.system('mmaps -d&')
+    os.system('mmaps -d &')
 
 if options.n is None:
     COUNT = 10
