@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-initially populates the directory with a set of structures determined by atat and then runs them.'''
+initially populates the directory with a set of structures determined by atat and then run a sprecified script in each directory.'''
 import os, time, sys
 from optparse import OptionParser
 
@@ -20,6 +20,12 @@ parser.add_option('-r',
 
 options,args = parser.parse_args()
 
+if os.path.exists('maps_is_running'):
+    print('Detected maps_is_running. attempting to stop it.')
+    open('stop','w').close()
+    time.sleep(10)
+    os.unlink('maps_is_running')
+    
 if options.m is None:
     os.system('maps -d&')
 else:
