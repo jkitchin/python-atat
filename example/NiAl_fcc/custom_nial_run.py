@@ -49,8 +49,8 @@ def run():
             data = json.loads(f.read())
             data['cwd'] = cwd
             print s.format(**data)
-            return
-            
+            return data
+
     # get the atoms object from str.out
     atoms = str2atoms()
 
@@ -70,15 +70,16 @@ def run():
               **vasppars) as calc:
         calc.set_nbands(f=2)
 
+        
         data = calc.get_eos()
         M = atoms.get_magnetic_moment()
         B = data['step2']['avgB']
             
         with open('energy', 'w') as f:
             f.write(repr(data['step3']['potential_energy']))
-                
+
     # now we are done, we can delete some files
-    for f in ['wait', 'jobid']:
+    for f in ['wait', 'jobid', 'error']:
         if os.path.exists(f):
             os.unlink(f)
 
@@ -95,20 +96,22 @@ def run():
 
     # print summary line
     print(s.format(**jsondata))
+    return jsondata # in case this is ever called as a function
         
 if __name__ == '__main__':
     # if we are in the queue, run the function above
     if 'PBS_O_WORKDIR' in os.environ:
         JASPRC['mode'] = 'run'  # so we can run in the queue
-        run()
+        try:
+            run()
+        except:
+            open('error', 'w').close()
+            
     else:
         # we are not in the queue, so we should submit a job if needed
         if os.path.exists('atat.json'):
-            with open('atat.json') as f:
-                data = json.loads(f.read())
-                data['cwd'] = cwd
-                print(s.format(**data))
-                sys.exit()
+            run() # this will print data and return
+            sys.exit()
         # see if a job exists. Exit if it does.
         elif os.path.exists('jobid'):
             with open('jobid') as f:
