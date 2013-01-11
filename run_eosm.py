@@ -3,6 +3,11 @@
 script to run in an ATAT directory
 
 The script automatically sets up a VASP calculation, sets the magnetic moments, and computes an equation of state.
+
+When you run this in the queue, VASP is run.
+When you run this on the login node, a job is submitted.
+
+Only serial jobs are supported. it will take some effort to get parallel or multiprocessing integrated.
 '''
 import os, sys
 if 'PBS_O_WORKDIR' in os.environ:
@@ -46,6 +51,7 @@ for vwp in ['../../vaspwrap.py', '../vaspwrap.py', 'vaspwrap.py']:
         execfile(vwp)
 if not found:
     raise IOError, "no vaspwrap.py found!"
+    
 ##################################################################
 ###### script below here.
 
@@ -135,7 +141,7 @@ if __name__ == '__main__':
         script = '''
 #!/bin/bash
 cd $PBS_O_WORKDIR
-python ../custom_nial_run.py
+python run_eosm.py
 '''
         p = Popen(['qsub',
                    '-joe',
