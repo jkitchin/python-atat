@@ -47,11 +47,71 @@ atatstatus.py
 |   0|                        energy = -5.5772|[[ashell:xterm -e "cd 0; ls && /bin/bash"][xterm]]|
 |   1|                        energy = -3.7401|[[ashell:xterm -e "cd 1; ls && /bin/bash"][xterm]]|
 |  10|      804321.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 10; ls && /bin/bash"][xterm]]|
-|   2|      804313.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 2; ls && /bin/bash"][xterm]]|
+|   2|                       energy = -10.1603|[[ashell:xterm -e "cd 2; ls && /bin/bash"][xterm]]|
 |   3|                       energy = -10.6595|[[ashell:xterm -e "cd 3; ls && /bin/bash"][xterm]]|
-|   4|      804315.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 4; ls && /bin/bash"][xterm]]|
-|   5|      804316.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 5; ls && /bin/bash"][xterm]]|
-|   6|      804317.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 6; ls && /bin/bash"][xterm]]|
-|   7|      804318.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 7; ls && /bin/bash"][xterm]]|
-|   8|      804319.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 8; ls && /bin/bash"][xterm]]|
-|   9|      804320.gilgamesh.cheme.cmu.edu (R)|[[ashell:xterm -e "cd 9; ls && /bin/bash"][xterm]]|
+|   4|                       energy = -15.6420|[[ashell:xterm -e "cd 4; ls && /bin/bash"][xterm]]|
+|   5|                       energy = -13.9998|[[ashell:xterm -e "cd 5; ls && /bin/bash"][xterm]]|
+|   6|                       energy = -16.2457|[[ashell:xterm -e "cd 6; ls && /bin/bash"][xterm]]|
+|   7|                       energy = -14.2409|[[ashell:xterm -e "cd 7; ls && /bin/bash"][xterm]]|
+|   8|                       energy = -16.2536|[[ashell:xterm -e "cd 8; ls && /bin/bash"][xterm]]|
+|   9|                       energy = -14.2332|[[ashell:xterm -e "cd 9; ls && /bin/bash"][xterm]]|
+
+#+BEGIN_SRC sh
+mapsrep.py
+#+END_SRC
+
+#+RESULTS:
+: Maps version 2.86
+: The internal database of structures extends up to 0 atoms/unit cell, see predstr.out
+: Among structures of known energy, true and predicted ground states agree
+: No other ground states of 0 atoms/unit cell or less exist.
+: Concentration range used for ground state checking: [0,1].
+: Crossvalidation score: 0.175406
+: [[./groundstate-hull.png]]
+: [[./residual-error.png]]
+: [[./eci-cluster-radius.png]]
+
+* print a summary table
+#+BEGIN_SRC python 
+import json
+import glob, os
+
+print '#+tblname: summary'
+print '|dir|energy (eV)|volume|B|M|\n|-'
+for d in glob.glob('[0-9]*'):
+    jd = os.path.join(d,'atat.json')
+    if os.path.exists(jd):
+        with open(jd) as f:
+            data = json.loads(f.read())
+    print '|{cwd}|{energy}|{volume}|{B}|{M}|'.format(**data)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+#+tblname: summary
+| dir | energy (eV) |        volume |             B |          M |
+|-----+-------------+---------------+---------------+------------|
+|   0 |   -5.577231 | 10.9317240539 | 196.979572877 |  0.6249399 |
+|   1 |   -3.740148 | 16.4759220363 | 77.6758689843 |        0.0 |
+|   2 |  -10.160278 | 12.6473147405 | 139.758006298 |   3.61e-05 |
+|   3 |  -10.659464 | 12.0695927534 | 160.530173983 |   0.009778 |
+|   4 |  -15.641997 | 12.0101991174 | 153.464782903 |   0.543442 |
+|   5 |  -13.999849 | 13.9016291178 | 112.227331611 |  0.0034303 |
+|   6 |  -16.245707 | 11.7172707206 | 167.928551604 |  0.0001492 |
+|   7 |  -14.240858 | 13.4408643393 | 125.474520009 | -0.0011665 |
+|   8 |  -16.253649 | 11.6498015662 | 167.978483521 |  0.1887223 |
+|   9 |  -14.233193 | 13.5801258207 | 119.039777621 | -0.0007485 |
+|   9 |  -14.233193 | 13.5801258207 | 119.039777621 | -0.0007485 |
+#+end_example
+
+Simple example of using the data to make a plot of bulk modulus vs. volume.
+#+BEGIN_SRC python :var x=summary[,2] y=summary[,3]
+import matplotlib.pyplot as plt
+plt.plot(x, y, 'bo')
+plt.show()
+#+END_SRC
+
+#+RESULTS:
+
+
+
