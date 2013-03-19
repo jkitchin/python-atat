@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 '''
-initially populates the directory with a set of structures determined by atat and then run a sprecified script in each directory.'''
+initially populates the directory with a set of structures determined by atat and then run a specified script in each directory.'''
 import os, time, sys
 from optparse import OptionParser
 
 parser = OptionParser(usage='startatat.py [-m] [COUNT] [-r] [command]',
                       version='0.1')
+
 parser.add_option('-m',
                   nargs=0,
                   help = 'run mmaps instead of maps')
