@@ -5,6 +5,8 @@ Script to create an excel spreadsheet containing the ATAT data
 Sheet 1 - Summary data
 id1 composition formation_energy bulk_modulus
 
+note: the bulk modulus will only be written if atat.atat_eos was used to create an equation of state.
+
 Sheet 2 - Unit cell parameters
 id1 a b c alpha beta gamma volume sxx syy szz sxy syz sxz
 
@@ -91,7 +93,10 @@ with open('fit.out') as fh:
             spacegroup = spglib.get_spacegroup(atoms, symprec=1e-5)
 
             natoms = len(atoms)
-            x, V0, e0, B = analyze_eos()
+            try:
+                x, V0, e0, B = analyze_eos()
+            except TypeError:
+                x, V0, e0, B = None, None, None, None
 
             magmom = atoms.get_magnetic_moment()
             # now we want to write out a row of
@@ -153,8 +158,6 @@ with open('fit.out') as fh:
                 data = [id1, sym, ppp, hash]
                 for i,d in enumerate(data):
                     sh4.write(NROWS4, i, d)
-                
-                
                 
         wbk.save('atat.xls')
 
