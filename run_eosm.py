@@ -2,16 +2,23 @@
 '''
 script to run in an ATAT directory
 
-The script automatically sets up a VASP calculation, sets the magnetic moments, and computes an equation of state.
+The script automatically sets up a VASP calculation, sets the magnetic moments, and computes an equation of state. You run this script inside an ATAT directory.
 
 When you run this in the queue, VASP is run.
 When you run this on the login node, a job is submitted.
 
-Only serial jobs are supported. it will take some effort to get parallel or multiprocessing integrated.
+Only serial jobs are supported. it will take some effort to get parallel or multiprocessing integrated. It might be possible to set this in vaspwrap.py
+
+Example usage with ATAT integration
+startatat.py [-m] [COUNT] -r run_eosm.py
+
+Future features:
+define a function for estimating the volume for cases where Vegard's law is known to be inadequate.
 '''
+
 import os, sys
 if 'PBS_O_WORKDIR' in os.environ:
-    #use a non-X requiring background
+    #use a non-X requiring background in case a matplotlib plot is made
     import matplotlib
     matplotlib.use('Agg')
 
@@ -46,6 +53,7 @@ KPPRA = 2000
 
 found = False
 for vwp in ['../../vaspwrap.py', '../vaspwrap.py', 'vaspwrap.py']:
+    # execute each one. local wrapper has precedent.
     if os.path.exists(vwp):
         found = True
         execfile(vwp)
@@ -87,9 +95,13 @@ def run():
               atoms=atoms,
               **vasppars) as calc:
         calc.set_nbands(f=2)
-
         
-        data = calc.get_eos()
+        try:
+            data = calc.get_eos()
+        except:
+            with open('error', 'w') as f:
+                f.write('Error getting the equation of state')
+
         M = atoms.get_magnetic_moment()
         B = data['step2']['avgB']
             
